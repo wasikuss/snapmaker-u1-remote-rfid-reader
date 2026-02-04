@@ -1,0 +1,24 @@
+{
+  "oled": {
+    "scl": 6,
+    "sda": 5
+  },
+
+  "rfid": {
+    "sck": 4,
+    "mosi": 7,
+    "miso": 8,
+    "rst": 9,
+    "cs": 3,
+    "debug": false
+  },
+
+  "button": {
+    "pin": 9
+  },
+
+  "printer": {
+    "host": "IP_ADDRESS_OF_PRINTER",
+    "port": 7125
+  }
+}
