@@ -14,12 +14,10 @@ This repository contains the source code for a small RFID device designed to rea
 - **RC522 RFID Module**: Currently supports the RC522 module for RFID tag reading. Additional module support will be added in the future.
 - **Tested Hardware**: The project has been tested on the ESP32-C3-OLED board with the RC522 mini module.
 
-<table>
-<tr>
-<td><img src="docs/esp32-c3-oled.png" alt="ESP32-C3 OLED" width="400"/></td>
-<td><img src="docs/rc522.png" alt="RC522 mini" width="400"/></td>
-</tr>
-</table>
+# Connection diagram
+Warning pins 5 and 6 are used by oled display
+
+![connection diagram](docs/connecton_diagram.png)
 
 ## Software Requirements
 
