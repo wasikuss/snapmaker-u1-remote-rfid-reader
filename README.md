@@ -2,6 +2,9 @@
 
 This repository contains the source code for a small RFID device designed to read RFID tags and send their contents to a Snapmaker U1 3D printer, so it acts as remote RFID antennas. On the printer side there is needed new GCODE to support remote RFID requests -> [TODO: put link here](https://github.com/paxx12/SnapmakerU1-Extended-Firmware)
 
+## Variations
+- ESP32-C3-OLED + PN532 - [branch eps32-c3-oled-pn532](https://github.com/wasikuss/snapmaker-u1-remote-rfid-reader/tree/eps32-c3-oled-pn532)
+
 ## Features
 
 - **RFID Tag Reading**: Reads data from RFID tags.
@@ -10,9 +13,10 @@ This repository contains the source code for a small RFID device designed to rea
 
 ## Hardware Requirements
 
-- **ESP32 Device**: The code is designed to run on an ESP32 microcontroller. Additional boards support will be added in the future. 
-- **RC522 RFID Module**: Currently supports the RC522 module for RFID tag reading. Additional module support will be added in the future.
-- **Tested Hardware**: The project has been tested on the ESP32-C3-OLED board with the RC522 mini module.
+- **ESP32 Device**: The code is designed to run on an ESP32 microcontroller. A
+- **RC522 RFID Module**: RC522 module for RFID tag reading.
+
+Support for additional boards or modules will be added in the future.
 
 # Connection diagram
 Warning pins 5 and 6 are used by oled display
