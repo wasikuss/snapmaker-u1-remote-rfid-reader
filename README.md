@@ -3,7 +3,7 @@
 This repository contains the source code for a small RFID device designed to read RFID tags and send their contents to a Snapmaker U1 3D printer, so it acts as remote RFID antennas. On the printer side there is needed new GCODE to support remote RFID requests -> [TODO: put link here](https://github.com/paxx12/SnapmakerU1-Extended-Firmware)
 
 ## Variations
-- ESP32-C3-OLED + PN532 - [branch eps32-c3-oled-pn532](https://github.com/wasikuss/snapmaker-u1-remote-rfid-reader/tree/eps32-c3-oled-pn532)
+- ESP32-C3-OLED + RC522 - [branch main](https://github.com/wasikuss/snapmaker-u1-remote-rfid-reader/tree/main)
 
 ## Features
 
@@ -14,7 +14,7 @@ This repository contains the source code for a small RFID device designed to rea
 ## Hardware Requirements
 
 - **ESP32 Device**: The code is designed to run on an ESP32 microcontroller. A
-- **RC522 RFID Module**: RC522 module for RFID tag reading.
+- **PN532 RFID Module**: PN532 module for RFID tag reading.
 
 Support for additional boards or modules will be added in the future.
 
@@ -27,8 +27,7 @@ Warning pins 5 and 6 are used by oled display
 
 - **MicroPython**: The ESP32 device must be flashed with MicroPython firmware. You can download the firmware from the [official MicroPython website](https://micropython.org/).
 - **SSD1306**: MicroPython SSD1306 OLED driver for I2C and SPI [source](https://github.com/CytronTechnologies/MAKER-PI-PICO/blob/main/Example%20Code/MicroPython/I2C%20OLED/ssd1306.py)
-- **MFRC522** MicroPython RC522 driver for SPI [source](https://github.com/wendlers/micropython-mfrc522/blob/master/mfrc522.py)
-  - modify line 32 to `elif board == 'esp8266' or board == 'esp32':`
+- **PN532** MicroPython PN532 driver for SPI [source](https://github.com/Carglglz/NFC_PN532_SPI/blob/master/NFC_PN532.py)
 
 ## Setup
 

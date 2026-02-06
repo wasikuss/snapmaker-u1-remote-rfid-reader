@@ -5,11 +5,11 @@
   },
 
   "rfid": {
-    "sck": 8,
+    "sck": 3,
     "mosi": 7,
     "miso": 4,
-    "rst": 3,
-    "cs": 9,
+    "rst": 9,
+    "cs": 8,
     "debug": false
   },
 

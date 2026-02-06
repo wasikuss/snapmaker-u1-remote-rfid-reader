@@ -1,4 +1,5 @@
-import mfrc522
+from NFC_PN532 import PN532
+from machine import Pin, SPI
 
 class RFIDReader:
     BLOCK_SIZE = 4
@@ -6,38 +7,26 @@ class RFIDReader:
 
     def __init__(self, cfg):
         self.start_block = 4
-        self.rc = mfrc522.MFRC522(
-            cfg["sck"],
-            cfg["mosi"],
-            cfg["miso"],
-            cfg["rst"],
-            cfg["cs"]
-        )
+        spi = SPI(baudrate=1000000, polarity=0, phase=0,
+                  sck=Pin(cfg["sck"], Pin.OUT),
+                  mosi=Pin(cfg["mosi"], Pin.OUT),
+                  miso=Pin(cfg["miso"], Pin.IN))
+        cs_pin = Pin(cfg["cs"], Pin.OUT)
+        rst_pin = Pin(cfg["rst"], Pin.OUT)
+
+        self.rc = PN532(spi, cs_pin, reset=rst_pin, debug=cfg.get("debug", False))
+        self.rc.SAM_configuration()
         self.debug = cfg.get("debug", False)
 
     def detect_card(self):
-        stat, _ = self.rc.request(self.rc.REQIDL)
-        if stat != self.rc.OK:
-            self.rc.init()
+        uid = self.rc.read_passive_target()
+        if not uid:
             if self.debug:
                 print("No card detected")
             return None
-        
-        if self.debug:
-            print("Card detected")
 
-        stat, uid = self.rc.anticoll()
-        if stat != self.rc.OK:
-            return None
-        
         if self.debug:
-            print("Card UID:", [hex(i) for i in uid])
-
-        if self.rc.select_tag(uid) != self.rc.OK:
-            return None
-        
-        if self.debug:
-            print("Card selected")
+            print("Card detected, UID:", [hex(i) for i in uid])
 
         return uid
 
@@ -48,7 +37,7 @@ class RFIDReader:
         remaining_updated = False
 
         while remaining > 0 or not remaining_updated:
-            block_data = self.rc.read(block)
+            block_data = self.rc.mifare_classic_read_block(block)
             if not block_data:
                 if self.debug:
                     print("Failed to read block", block)
@@ -72,7 +61,7 @@ class RFIDReader:
             print("Raw TLV data:", data)
 
         return data[2:data[1] + 2]
-    
+
     def parse_ndef_text(self, ndef):
         type_len = ndef[1]
         payload_len = ndef[2]
@@ -84,7 +73,7 @@ class RFIDReader:
             if self.debug:
                 print("Not a text record", type)
             return None
-        
+
         if self.debug:
             print("NDEF text record detected")
 
@@ -100,7 +89,7 @@ class RFIDReader:
             print("NDEF text value:", value)
 
         return value
-    
+
     def parse_ndef_mime(self, ndef):
         type_len = ndef[1]
         payload_len = ndef[2]
@@ -122,7 +111,7 @@ class RFIDReader:
             if self.debug:
                 print("Invalid NDEF record", ndef)
             return None
-        
+
         if ndef[0] == 0xD1:
             return self.parse_ndef_text(ndef)
         elif ndef[0] == 0xD2:
