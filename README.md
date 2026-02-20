@@ -27,7 +27,7 @@ Warning pins 5 and 6 are used by oled display
 
 - **MicroPython**: The ESP32 device must be flashed with MicroPython firmware. You can download the firmware from the [official MicroPython website](https://micropython.org/).
 - **SSD1306**: MicroPython SSD1306 OLED driver for I2C and SPI [source](https://github.com/CytronTechnologies/MAKER-PI-PICO/blob/main/Example%20Code/MicroPython/I2C%20OLED/ssd1306.py)
-- **PN532** MicroPython PN532 driver for SPI [source](https://github.com/Carglglz/NFC_PN532_SPI/blob/master/NFC_PN532.py)
+- **PN532** MicroPython PN532 driver for I2C [source](https://github.com/snwng/MPY_PN532/blob/master/PN532.py)
 
 ## Setup
 

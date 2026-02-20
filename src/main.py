@@ -46,7 +46,7 @@ while True:
 
         if rfid_timer.ready():
             data = rfid.read_text()
-            if data:
+            if data is not None and data != last_data:
                 last_data = data
                 last_data_text.set_text(last_data)
 

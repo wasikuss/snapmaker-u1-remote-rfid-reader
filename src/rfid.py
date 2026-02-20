@@ -1,5 +1,5 @@
-from NFC_PN532 import PN532
-from machine import Pin, SPI
+from machine import Pin, I2C
+from PN532 import PN532_I2C
 
 class RFIDReader:
     BLOCK_SIZE = 4
@@ -7,19 +7,14 @@ class RFIDReader:
 
     def __init__(self, cfg):
         self.start_block = 4
-        spi = SPI(baudrate=1000000, polarity=0, phase=0,
-                  sck=Pin(cfg["sck"], Pin.OUT),
-                  mosi=Pin(cfg["mosi"], Pin.OUT),
-                  miso=Pin(cfg["miso"], Pin.IN))
-        cs_pin = Pin(cfg["cs"], Pin.OUT)
-        rst_pin = Pin(cfg["rst"], Pin.OUT)
+        i2c = I2C(0, scl=Pin(cfg["scl"]), sda=Pin(cfg["sda"]))
 
-        self.rc = PN532(spi, cs_pin, reset=rst_pin, debug=cfg.get("debug", False))
-        self.rc.SAM_configuration()
+        self.rc = PN532_I2C(i2c, debug=cfg.get("debug", False))
+        self.rc.set_mode()
         self.debug = cfg.get("debug", False)
 
     def detect_card(self):
-        uid = self.rc.read_passive_target()
+        uid = self.rc.list_passive_target()[3]
         if not uid:
             if self.debug:
                 print("No card detected")
@@ -37,7 +32,7 @@ class RFIDReader:
         remaining_updated = False
 
         while remaining > 0 or not remaining_updated:
-            block_data = self.rc.mifare_classic_read_block(block)
+            block_data = self.rc.mifare_classic_read(1, block)
             if not block_data:
                 if self.debug:
                     print("Failed to read block", block)
