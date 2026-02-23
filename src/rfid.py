@@ -34,7 +34,13 @@ class RFIDReader:
         remaining_updated = False
 
         while remaining > 0 or not remaining_updated:
-            block_data = self.rc.mifare_classic_read(1, block)
+            block_data = None
+            try:
+                block_data = self.rc.mifare_classic_read(1, block)
+            except OSError:
+                if self.debug:
+                    print("Failed to read block", block, "retrying...")
+                continue
             if not block_data:
                 if self.debug:
                     print("Failed to read block", block)
