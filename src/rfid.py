@@ -14,11 +14,13 @@ class RFIDReader:
         self.debug = cfg.get("debug", False)
 
     def detect_card(self):
-        uid = self.rc.list_passive_target()[3]
+        uid = self.rc.list_passive_target()
         if not uid:
             if self.debug:
                 print("No card detected")
             return None
+
+        uid = uid[3]
 
         if self.debug:
             print("Card detected, UID:", [hex(i) for i in uid])
@@ -117,6 +119,11 @@ class RFIDReader:
             return None
 
     def read_text(self):
-        if not self.detect_card():
+        try:
+            if not self.detect_card():
+                return None
+            return self.parse_ndef(self.read_tlv())
+        except Exception as e:
+            if self.debug:
+                print("Error reading rfid:", e)
             return None
-        return self.parse_ndef(self.read_tlv())
