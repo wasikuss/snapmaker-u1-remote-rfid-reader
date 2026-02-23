@@ -55,6 +55,8 @@ try:
                 data = ubinascii.b2a_base64(last_data).decode("utf-8").strip()
                 ok = printer.send_filament_data(channel, data)
                 display.show_message("Done" if ok else "Error")
+                if ok:
+                    last_data = None
                 time.sleep(1)
 
         time.sleep_ms(250)
