@@ -25,13 +25,12 @@ channel = 0
 IDLE_TEXT = TextScroller("        Hold to change channel. Press to read")
 
 while True:
-    ui.update()
-    ui.handle_event()
+    event = ui.handle_event()
 
     if ui.state == UIState.IDLE:
         next_line = display.show_message(IDLE_TEXT.get_text(display.LINE_WIDTH))
         IDLE_TEXT.scroll()
-        if ui.event == UIEvent.LONG_PRESS:
+        if event == UIEvent.LONG_PRESS:
             channel = (channel + 1) % 4
             display.show_message(f"Channel set to {channel}", start_line=next_line, clear=False)
         else:
@@ -50,7 +49,7 @@ while True:
                 last_data = data
                 last_data_text.set_text(last_data)
 
-        if ui.event == UIEvent.LONG_PRESS and last_data:
+        if event == UIEvent.LONG_PRESS and last_data:
             display.show_message("Connecting...")
             data = ubinascii.b2a_base64(last_data).decode("utf-8").strip()
             ok = printer.send_filament_data(channel, data)

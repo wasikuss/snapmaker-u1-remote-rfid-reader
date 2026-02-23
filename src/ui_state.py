@@ -1,4 +1,3 @@
-# ui_state.py
 import time
 from machine import Pin
 
@@ -21,41 +20,35 @@ class UIStateMachine:
         self.state = UIState.IDLE
 
         self._pressed_at = None
-        self._long_fired = False
         self._last_change = 0
 
         self.event = UIEvent.NONE
 
-    def update(self):
-        self.event = UIEvent.NONE
+        # Set up IRQ for the button pin
+        self.button.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING, handler=self._handle_irq)
+
+    def _handle_irq(self, pin):
         now = time.ticks_ms()
-        pressed = self.button.value() == 0
+        pressed = pin.value() == 0
 
         # debounce
         if time.ticks_diff(now, self._last_change) < self.debounce_ms:
             return
 
-        if pressed and self._pressed_at is None:
+        self._last_change = now
+
+        if pressed:
             # button just pressed
             self._pressed_at = now
-            self._long_fired = False
-            self._last_change = now
-
-        elif pressed and self._pressed_at is not None:
-            # button held
-            if not self._long_fired:
+        else:
+            # button released
+            if self._pressed_at is not None:
                 held = time.ticks_diff(now, self._pressed_at)
                 if held >= self.long_press_ms:
                     self.event = UIEvent.LONG_PRESS
-                    self._long_fired = True
-
-        elif not pressed and self._pressed_at is not None:
-            # button released
-            held = time.ticks_diff(now, self._pressed_at)
-            if held < self.long_press_ms:
-                self.event = UIEvent.SHORT_PRESS
-            self._pressed_at = None
-            self._last_change = now
+                else:
+                    self.event = UIEvent.SHORT_PRESS
+                self._pressed_at = None
 
     def handle_event(self):
         if self.event == UIEvent.SHORT_PRESS:
@@ -63,3 +56,7 @@ class UIStateMachine:
                 self.state = UIState.READ
             elif self.state == UIState.READ:
                 self.state = UIState.IDLE
+
+        event = self.event
+        self.event = UIEvent.NONE
+        return event
