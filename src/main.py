@@ -1,65 +1,73 @@
+import sys
 import time
-import ubinascii
 from config import Config
 from display import OLEDDisplay
 from rfid import RFIDReader
 from printer import PrinterClient
-from ui_state import UIStateMachine, UIState, UIEvent
-from text_scroller import TextScroller
+from button_handler import ButtonHandler, Event
+from pixel_text_scroller import PixelTextScroller
 from periodic_timer import PeriodicTimer
+from channel_control import ChannelControl, ChannelState
 
 cfg = Config()
 
 display = OLEDDisplay(cfg.oled())
 rfid = RFIDReader(cfg.rfid())
 printer = PrinterClient(cfg.printer())
-ui = UIStateMachine(button_pin=9)
+btn_handler = ButtonHandler(button_pin=9)
 
-rfid_timer = PeriodicTimer(1000)
+cursor_position = 0
 
-last_data = None
-last_data_text = TextScroller()
+# Initialize channel controls
+channels = [ChannelControl(i + 1, display) for i in range(4)]
 
-channel = 0
-
-IDLE_TEXT = TextScroller("        Hold to change channel. Press to read")
+APP_NAME = "U1 RFID Reader"
+MENU_ITEMS = ["CH 1", "CH 2", "CH 3", "CH 4", "Send Data"]
 
 try:
     while True:
-        event = ui.handle_event()
+        event = btn_handler.handle_event()
 
-        if ui.state == UIState.IDLE:
-            next_line = display.show_message(IDLE_TEXT.get_text(display.LINE_WIDTH))
-            IDLE_TEXT.scroll()
-            if event == UIEvent.LONG_PRESS:
-                channel = (channel + 1) % 4
-                display.show_message(f"Channel set to {channel}", start_line=next_line, clear=False)
-            else:
-                display.show_message(f"Channel {channel}", start_line=next_line, clear=False)
+        display.show_message(APP_NAME, start_line=0, clear=False)
 
+        for i, channel in enumerate(channels):
+            selected = (cursor_position == i)
+            channel.update(selected, event, rfid)
+            channel.render(selected)
 
-        elif ui.state == UIState.READ:
-            next_line = display.show_message("Reading..\nHold to send")
-            if last_data:
-                display.show_message(last_data_text.get_text(display.LINE_WIDTH), start_line=next_line, clear=False)
-                last_data_text.scroll()
+        send_data_selected = (cursor_position == 4)
+        send_data_text = "> Send Data" if send_data_selected else "  Send Data"
+        display.clear_text_bg(5)
+        display.show_message(send_data_text, start_line=5, clear=False)
 
-            if rfid_timer.ready():
-                data = rfid.read_text()
-                if data is not None and data != last_data:
-                    last_data = data
-                    last_data_text.set_text(last_data)
+        if event == Event.SHORT_PRESS:
+            cursor_position = (cursor_position + 1) % len(MENU_ITEMS)
+        elif event == Event.LONG_PRESS:
+            if cursor_position == 4:
+                send_data_text = "> Sending "
+                display.clear_text_bg(5)
+                display.show_message(send_data_text, start_line=5, clear=False)
 
-            if event == UIEvent.LONG_PRESS and last_data:
-                display.show_message("Connecting...")
-                data = ubinascii.b2a_base64(last_data).decode("utf-8").strip()
-                ok = printer.send_filament_data(channel, data)
-                display.show_message("Done" if ok else "Error")
-                if ok:
-                    last_data = None
-                time.sleep(1)
+                for i, channel in enumerate(channels):
+                    if channel.state == ChannelState.EMPTY:
+                        send_data_text += '.'
+                        display.clear_text_bg(5)
+                        display.show_message(send_data_text, start_line=5, clear=False)
+                    elif channel.state == ChannelState.DATA:
+                        send_data_text += 'D'
+                        display.clear_text_bg(5)
+                        display.show_message(send_data_text, start_line=5, clear=False)
 
-        time.sleep_ms(250)
+                        ok = printer.send_filament_data(i, channel.last_data)
+
+                        send_data_text = send_data_text[:-1] + ('O' if ok else 'X')
+                        display.clear_text_bg(5)
+                        display.show_message(send_data_text, start_line=5, clear=False)
+                        time.sleep(1)
+
+        time.sleep_ms(30)
+
 except Exception as e:
     print("Fatal error:", e)
+    sys.print_exception(e)
     display.show_message("FATAL")

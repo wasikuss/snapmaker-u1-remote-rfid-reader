@@ -1,5 +1,6 @@
 import socket
 import json
+import sys
 
 class PrinterClient:
     def __init__(self, cfg):
@@ -7,18 +8,50 @@ class PrinterClient:
         self.port = cfg.get("port", 7125)
 
     def send_filament_data(self, channel, data):
-        payload = json.dumps({
-            "script": f"FILAMENT_DT_FIXED CHANNEL={channel} DATA='{data}'"
-        })
+
+        json_data = json.loads(data['payload'])
+        info = {}
+        webhook_payload = {
+            'channel': channel,
+            'info': info
+        }
+
+        if 'brand' in json_data:
+            info['vendor'] = json_data['brand']
+
+        if 'type' in json_data:
+            info['type'] = json_data['type']
+
+        if 'subtype' in json_data:
+            info['subtype'] = json_data['subtype']
+
+        if 'color_hex' in json_data:
+            info['color'] = json_data['color_hex']
+
+        if 'alpha' in json_data:
+            info['alpha'] = json_data['alpha']
+
+        if 'min_temp' in json_data:
+            info['min_temp'] = json_data['min_temp']
+
+        if 'max_temp' in json_data:
+            info['max_temp'] = json_data['max_temp']
+
+        if 'bed_min_temp' in json_data:
+            info['bed_temp'] = json_data['bed_min_temp']
+
+        info['card_uid'] = data['uid']
+        payload = json.dumps(webhook_payload)
 
         print("Sending data to printer...", payload)
 
-        addr = socket.getaddrinfo(self.host, self.port)[0][-1]
-        s = socket.socket()
-        s.connect(addr)
+        s = None
         try:
+            addr = socket.getaddrinfo(self.host, self.port)[0][-1]
+            s = socket.socket()
+            s.connect(addr)
             request = (
-                "POST /printer/gcode/script HTTP/1.1\r\n"
+                "POST /printer/filament_detect/set HTTP/1.1\r\n"
                 f"Host: {self.host}\r\n"
                 "Content-Type: application/json\r\n"
                 f"Content-Length: {len(payload)}\r\n\r\n"
@@ -26,11 +59,14 @@ class PrinterClient:
             )
 
             s.send(request.encode())
-            s.recv(1024)
+            response = s.recv(1024)
+            print("Received response:", response)
 
             return True
         except Exception as e:
             print("Error sending data to printer:", e)
+            sys.print_exception(e)
             return False
         finally:
-            s.close()
+            if s:
+                s.close()

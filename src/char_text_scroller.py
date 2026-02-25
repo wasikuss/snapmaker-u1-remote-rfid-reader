@@ -1,4 +1,4 @@
-class TextScroller:
+class CharTextScroller:
     def __init__(self, text=None):
         self.pos = 0
         self.text = text or ""

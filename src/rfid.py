@@ -1,3 +1,5 @@
+import sys
+
 from machine import Pin, I2C
 from PN532 import PN532_I2C
 
@@ -16,7 +18,12 @@ class RFIDReader:
     def detect_card(self):
         uid = self.rc.list_passive_target()
         if not uid:
-            if self.debug:
+            # if uid is list but empty, it means there was an error communicating with the reader. set mode again to reset it
+            if uid is not None:
+                if self.debug:
+                    print("Error communicating with RFID reader, resetting...")
+                self.rc.set_mode()
+            elif self.debug:
                 print("No card detected")
             return None
 
@@ -25,7 +32,7 @@ class RFIDReader:
         if self.debug:
             print("Card detected, UID:", [hex(i) for i in uid])
 
-        return uid
+        return bytes(uid).hex()
 
     def read_tlv(self):
         block = self.start_block
@@ -124,12 +131,15 @@ class RFIDReader:
                 print("NDEF URI records are not supported")
             return None
 
-    def read_text(self):
+    def read_text_and_uid(self):
         try:
-            if not self.detect_card():
-                return None
-            return self.parse_ndef(self.read_tlv())
+            uid = self.detect_card()
+            if not uid:
+                return None, None
+            
+            return self.parse_ndef(self.read_tlv()), uid
         except Exception as e:
             if self.debug:
                 print("Error reading rfid:", e)
-            return None
+                sys.print_exception(e)
+            return None, None
