@@ -20,7 +20,7 @@ class EventWrapper:
                 return Action.SOFT_RESET
             elif event_2 != BtnEvent.NONE:
                 return Action.ACTIVATE
-            elif event_1 == BtnEvent.NONE:
+            elif event_1 != BtnEvent.NONE:
                 return Action.NEXT
         else:
             if event_1 == BtnEvent.LONG_PRESS:
