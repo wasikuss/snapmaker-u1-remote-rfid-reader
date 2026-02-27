@@ -1,10 +1,10 @@
-
 from button_handler import BtnEvent
 
 class Action:
     NONE = 0
     NEXT = 1
     ACTIVATE = 2
+    SOFT_RESET = 3
 
 class EventWrapper:
     def __init__(self, btn_1, btn_2=None):
@@ -16,7 +16,9 @@ class EventWrapper:
         event_2 = self.btn2.handle_event() if self.btn2 else None
 
         if self.btn2:
-            if event_2 != BtnEvent.NONE:
+            if event_1 != BtnEvent.NONE and event_2 != BtnEvent.NONE:
+                return Action.SOFT_RESET
+            elif event_2 != BtnEvent.NONE:
                 return Action.ACTIVATE
             elif event_1 == BtnEvent.NONE:
                 return Action.NEXT

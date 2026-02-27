@@ -32,6 +32,11 @@ try:
     while True:
         action = event_wrapper.handle_event()
 
+        if action == Action.SOFT_RESET:
+            import machine
+            machine.soft_reset()
+            break
+
         display.show_message(APP_NAME, start_line=0, clear=False)
 
         for i, channel in enumerate(channels):
