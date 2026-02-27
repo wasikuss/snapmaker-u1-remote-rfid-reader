@@ -1,5 +1,4 @@
 from machine import Pin, SoftI2C
-from ssd1306 import SSD1306_I2C
 
 class OLEDDisplay:
     LINE_HEIGHT = 11
@@ -15,9 +14,20 @@ class OLEDDisplay:
             scl=Pin(cfg["scl"]),
             sda=Pin(cfg["sda"])
         )
-        self.oled = SSD1306_I2C(
-            self.DISPLAY_WIDTH, self.DISPLAY_HEIGHT, i2c
-        )
+
+        driver = cfg.get("driver", "ssd1306")
+        if driver == "ssd1306":
+            from ssd1306 import SSD1306_I2C
+            self.oled = SSD1306_I2C(
+                self.DISPLAY_WIDTH, self.DISPLAY_HEIGHT, i2c
+            )
+        elif driver == "sh1106":
+            from sh1106 import SH1106_I2C
+            self.oled = SH1106_I2C(
+                self.DISPLAY_WIDTH, self.DISPLAY_HEIGHT, i2c
+            )
+        else:
+            raise ValueError("Unsupported OLED driver: " + driver)
 
     def clear(self):
         self.oled.fill(0)

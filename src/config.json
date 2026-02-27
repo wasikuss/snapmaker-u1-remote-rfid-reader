@@ -1,7 +1,8 @@
 {
   "oled": {
     "scl": 6,
-    "sda": 5
+    "sda": 5,
+    "driver": "ssd1306"
   },
 
   "rfid": {
