@@ -11,7 +11,8 @@
   },
 
   "button": {
-    "pin": 9
+    "pin": 9,
+    "pin2": 8
   },
 
   "printer": {

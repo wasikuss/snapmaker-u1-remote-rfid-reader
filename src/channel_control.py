@@ -1,6 +1,6 @@
 import json
 
-from button_handler import Event
+from event_wrapper import Action
 from one_shot_timer import OneShotTimer
 from periodic_timer import PeriodicTimer
 from char_text_scroller import CharTextScroller
@@ -23,8 +23,8 @@ class ChannelControl:
         self.last_data_text = CharTextScroller()
         self.last_data_text_timer = None
 
-    def update(self, selected, event, rfid_reader):
-        if selected and event == Event.LONG_PRESS:
+    def update(self, selected, action, rfid_reader):
+        if selected and action == Action.ACTIVATE:
             if self.state in [ChannelState.NO_DATA, ChannelState.BAD_DATA, ChannelState.EMPTY]:
                 self.no_data_timer = None
                 self.state = ChannelState.READING

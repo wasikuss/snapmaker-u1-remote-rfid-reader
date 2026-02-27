@@ -2,11 +2,10 @@ import sys
 import time
 from config import Config
 from display import OLEDDisplay
+from event_wrapper import Action, EventWrapper
 from rfid import RFIDReader
 from printer import PrinterClient
-from button_handler import ButtonHandler, Event
-from pixel_text_scroller import PixelTextScroller
-from periodic_timer import PeriodicTimer
+from button_handler import ButtonHandler
 from channel_control import ChannelControl, ChannelState
 
 cfg = Config()
@@ -14,7 +13,12 @@ cfg = Config()
 display = OLEDDisplay(cfg.oled())
 rfid = RFIDReader(cfg.rfid())
 printer = PrinterClient(cfg.printer())
-btn_handler = ButtonHandler(button_pin=9)
+btn_config = cfg.button()
+btn_1 = ButtonHandler(button_pin=btn_config['pin'])
+btn_2 = None
+if 'pin2' in btn_config:
+    btn_2 = ButtonHandler(button_pin=cfg.button()['pin2'])
+event_wrapper = EventWrapper(btn_1, btn_2)
 
 cursor_position = 0
 
@@ -26,13 +30,13 @@ MENU_ITEMS = ["CH 1", "CH 2", "CH 3", "CH 4", "Send Data"]
 
 try:
     while True:
-        event = btn_handler.handle_event()
+        action = event_wrapper.handle_event()
 
         display.show_message(APP_NAME, start_line=0, clear=False)
 
         for i, channel in enumerate(channels):
             selected = (cursor_position == i)
-            channel.update(selected, event, rfid)
+            channel.update(selected, action, rfid)
             channel.render(selected)
 
         send_data_selected = (cursor_position == 4)
@@ -40,9 +44,9 @@ try:
         display.clear_text_bg(5)
         display.show_message(send_data_text, start_line=5, clear=False)
 
-        if event == Event.SHORT_PRESS:
+        if action == Action.NEXT:
             cursor_position = (cursor_position + 1) % len(MENU_ITEMS)
-        elif event == Event.LONG_PRESS:
+        elif action == Action.ACTIVATE:
             if cursor_position == 4:
                 send_data_text = "> Sending "
                 display.clear_text_bg(5)

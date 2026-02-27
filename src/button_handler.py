@@ -1,7 +1,7 @@
 import time
 from machine import Pin
 
-class Event:
+class BtnEvent:
     NONE = 0
     SHORT_PRESS = 1
     LONG_PRESS = 2
@@ -16,7 +16,7 @@ class ButtonHandler:
         self._pressed_at = None
         self._last_change = 0
 
-        self.event = Event.NONE
+        self.event = BtnEvent.NONE
 
         self.button.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING, handler=self._handle_irq)
 
@@ -36,12 +36,12 @@ class ButtonHandler:
             if self._pressed_at is not None:
                 held = time.ticks_diff(now, self._pressed_at)
                 if held >= self.long_press_ms:
-                    self.event = Event.LONG_PRESS
+                    self.event = BtnEvent.LONG_PRESS
                 else:
-                    self.event = Event.SHORT_PRESS
+                    self.event = BtnEvent.SHORT_PRESS
                 self._pressed_at = None
 
     def handle_event(self):
         event = self.event
-        self.event = Event.NONE
+        self.event = BtnEvent.NONE
         return event
