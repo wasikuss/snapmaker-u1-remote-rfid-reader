@@ -17,30 +17,30 @@ class PrinterClient:
         }
 
         if 'brand' in json_data:
-            info['vendor'] = json_data['brand']
+            info['VENDOR'] = json_data['brand']
 
         if 'type' in json_data:
-            info['type'] = json_data['type']
+            info['MAIN_TYPE'] = json_data['type']
 
         if 'subtype' in json_data:
-            info['subtype'] = json_data['subtype']
+            info['SUB_TYPE'] = json_data['subtype']
 
         if 'color_hex' in json_data:
-            info['color'] = json_data['color_hex']
+            info['RGB_1'] = json_data['color_hex']
 
         if 'alpha' in json_data:
-            info['alpha'] = json_data['alpha']
+            info['ALPHA'] = json_data['alpha']
 
         if 'min_temp' in json_data:
-            info['min_temp'] = json_data['min_temp']
+            info['HOTEND_MIN_TEMP'] = json_data['min_temp']
 
         if 'max_temp' in json_data:
-            info['max_temp'] = json_data['max_temp']
+            info['HOTEND_MAX_TEMP'] = json_data['max_temp']
 
         if 'bed_min_temp' in json_data:
-            info['bed_temp'] = json_data['bed_min_temp']
+            info['BED_TEMP'] = json_data['bed_min_temp']
 
-        info['card_uid'] = data['uid']
+        # info['CARD_UID'] = data['uid']
         payload = json.dumps(webhook_payload)
 
         print("Sending data to printer...", payload)
