@@ -32,7 +32,7 @@ class RFIDReader:
         if self.debug:
             print("Card detected, UID:", [hex(i) for i in uid])
 
-        return bytes(uid).hex()
+        return uid
 
     def read_tlv(self):
         block = self.start_block

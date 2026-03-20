@@ -31,7 +31,7 @@ class ChannelControl:
                 self.render(selected)
                 data, uid = rfid_reader.read_text_and_uid()
                 if data is not None:
-                    print(f"Data read from channel {self.channel_num}: {data} (UID: {uid})")
+                    print(f"Data read from channel {self.channel_num}: {data} (UID: {bytes(uid).hex()})")
                     if DataValidator.validate(data):
                         self.state = ChannelState.DATA
                         self.last_data = {'payload': data, 'uid': uid}

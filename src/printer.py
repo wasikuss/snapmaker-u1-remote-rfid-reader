@@ -40,7 +40,7 @@ class PrinterClient:
         if 'bed_min_temp' in json_data:
             info['BED_TEMP'] = json_data['bed_min_temp']
 
-        # info['CARD_UID'] = data['uid']
+        info['CARD_UID'] = data['uid']
         payload = json.dumps(webhook_payload)
 
         print("Sending data to printer...", payload)
