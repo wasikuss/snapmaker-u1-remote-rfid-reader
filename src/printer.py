@@ -26,7 +26,7 @@ class PrinterClient:
             info['SUB_TYPE'] = json_data['subtype']
 
         if 'color_hex' in json_data:
-            info['RGB_1'] = json_data['color_hex']
+            info['RGB_1'] = int(json_data['color_hex'].lstrip('#'), 16)
 
         if 'alpha' in json_data:
             info['ALPHA'] = json_data['alpha']
